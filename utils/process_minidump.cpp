@@ -1,5 +1,7 @@
 #include "process_minidump.h"
 #include "process_privilege.h"
+#include "process_reflection.h"
+
 #include <dbghelp.h>
 
 BOOL (*_MiniDumpWriteDump)(
@@ -40,6 +42,8 @@ bool load_MiniDumpWriteDump()
 	return false;
 }
 
+#include <iostream>
+
 bool make_minidump(DWORD pid, std::string out_file)
 {
 	if (!load_MiniDumpWriteDump()) return false;
@@ -62,8 +66,19 @@ bool make_minidump(DWORD pid, std::string out_file)
 		CloseHandle(procHndl);
 		return false;
 	}
-	BOOL isDumped = _MiniDumpWriteDump(procHndl, pid, outFile, MiniDumpWithFullMemory, NULL, NULL, NULL);
 
+	HANDLE _pHndl = procHndl;
+	HANDLE cloned_proc = make_process_reflection(procHndl);
+	if (cloned_proc) {
+		std::cout << "Using process reflection!\n";
+		_pHndl = cloned_proc;
+	}
+
+	BOOL isDumped = _MiniDumpWriteDump(_pHndl, pid, outFile, MiniDumpWithFullMemory, NULL, NULL, NULL);
+
+	if (cloned_proc) {
+		release_process_reflection(&cloned_proc);
+	}
 	CloseHandle(outFile);
 	CloseHandle(procHndl);
 	return isDumped;

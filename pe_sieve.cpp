@@ -10,6 +10,7 @@
 #include "utils/util.h"
 #include "utils/process_privilege.h"
 #include "utils/process_minidump.h"
+#include "utils/process_reflection.h"
 #include "postprocessors/results_dumper.h"
 
 using namespace pesieve;
@@ -39,8 +40,12 @@ void check_access_denied(DWORD processID)
 
 HANDLE open_process(DWORD processID)
 {
+	const DWORD basic_access = PROCESS_VM_READ | PROCESS_QUERY_INFORMATION;
+	const DWORD reflection_access = PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION | PROCESS_DUP_HANDLE;
+	DWORD access = basic_access | reflection_access;
+
 	HANDLE hProcess = OpenProcess(
-		PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+		access,
 		FALSE, processID
 	);
 	if (hProcess != nullptr) {
@@ -51,7 +56,7 @@ HANDLE open_process(DWORD processID)
 		if (set_debug_privilege(processID)) {
 			//try again to open
 			hProcess = OpenProcess(
-				PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+				access,
 				FALSE, processID
 			);
 			if (hProcess != nullptr) {
@@ -137,9 +142,21 @@ ProcessScanReport* scan_process(const t_params args)
 			SetLastError(ERROR_INVALID_PARAMETER);
 			throw std::runtime_error("Scanner mismatch. Try to use the 64bit version of the scanner.");
 		}
-		ProcessScanner scanner(hProcess, args);
-		process_report = scanner.scanRemote();
+		HANDLE _pHndl = hProcess;
+		HANDLE cloned_proc = make_process_reflection(hProcess);
+		if (cloned_proc) {
+			std::cout << "Using process reflection!\n";
+			_pHndl = cloned_proc;
+		}
+		else {
+			std::cout << "Using raw process!\n";
+		}
 
+		ProcessScanner scanner(_pHndl, args);
+		process_report = scanner.scanRemote();
+		if (cloned_proc) {
+			release_process_reflection(&cloned_proc);
+		}
 	} catch (std::exception &e) {
 		std::cerr << "[ERROR] " << e.what() << std::endl;
 		return nullptr;
