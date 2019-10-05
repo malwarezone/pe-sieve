@@ -1,5 +1,6 @@
 #include "process_reflection.h"
-#include <processsnapshot.h>
+
+#include <iostream>
 
 typedef struct _RTLP_PROCESS_REFLECTION_REFLECTION_INFORMATION
 {
@@ -7,8 +8,6 @@ typedef struct _RTLP_PROCESS_REFLECTION_REFLECTION_INFORMATION
 	HANDLE ReflectionThreadHandle;
 	DWORD ReflectionClientId;
 } RTLP_PROCESS_REFLECTION_REFLECTION_INFORMATION, *PRTLP_PROCESS_REFLECTION_REFLECTION_INFORMATION;
-
-//#if (PHNT_VERSION >= PHNT_WIN7)
 
 NTSTATUS
 (*NTAPI _RtlCreateProcessReflection)( //from ntdll.dll
@@ -18,21 +17,6 @@ NTSTATUS
 	IN OPTIONAL PVOID StartContext,
 	IN OPTIONAL HANDLE EventHandle,
 	OUT OPTIONAL PRTLP_PROCESS_REFLECTION_REFLECTION_INFORMATION ReflectionInformation
-) = NULL;
-
-//#endif
-
-DWORD 
-(*_PssCaptureSnapshot)( //from Kernel32.dll
-	HANDLE            ProcessHandle,
-	PSS_CAPTURE_FLAGS CaptureFlags,
-	DWORD             ThreadContextFlags,
-	HPSS              *SnapshotHandle
-) = NULL;
-
-DWORD (*_PssFreeSnapshot)(
-	HANDLE ProcessHandle,
-	HPSS   SnapshotHandle
 ) = NULL;
 
 
@@ -58,7 +42,6 @@ bool load_RtlCreateProcessReflection()
 	return true;
 }
 
-#include <iostream>
 HANDLE make_process_reflection(HANDLE orig_hndl)
 {
 	if (!load_RtlCreateProcessReflection()) {
@@ -83,3 +66,4 @@ bool release_process_reflection(HANDLE* procHndl)
 	}
 	return false;
 }
+

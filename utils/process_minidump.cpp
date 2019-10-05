@@ -3,6 +3,7 @@
 #include "process_reflection.h"
 
 #include <dbghelp.h>
+#include <iostream>
 
 BOOL (*_MiniDumpWriteDump)(
 	HANDLE                            hProcess,
@@ -13,7 +14,6 @@ BOOL (*_MiniDumpWriteDump)(
 	PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
 	PMINIDUMP_CALLBACK_INFORMATION    CallbackParam
 	) = NULL;
-
 
 bool load_MiniDumpWriteDump()
 {
@@ -41,8 +41,6 @@ bool load_MiniDumpWriteDump()
 	}
 	return false;
 }
-
-#include <iostream>
 
 bool make_minidump(DWORD pid, std::string out_file)
 {
@@ -72,6 +70,9 @@ bool make_minidump(DWORD pid, std::string out_file)
 	if (cloned_proc) {
 		std::cout << "Using process reflection!\n";
 		_pHndl = cloned_proc;
+	}
+	else {
+		std::cout << "Using raw process!\n";
 	}
 
 	BOOL isDumped = _MiniDumpWriteDump(_pHndl, pid, outFile, MiniDumpWithFullMemory, NULL, NULL, NULL);
