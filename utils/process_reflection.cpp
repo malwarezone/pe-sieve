@@ -1,7 +1,7 @@
 #include "process_reflection.h"
 #include <processsnapshot.h>
 
-#define USE_RTL_PROCESS_REFLECTION
+//#define USE_RTL_PROCESS_REFLECTION
 
 typedef struct _RTLP_PROCESS_REFLECTION_REFLECTION_INFORMATION
 {
@@ -129,6 +129,7 @@ HPSS make_process_snapshot(HANDLE orig_hndl)
 		std::cout << "PssCaptureSnapshot failed: " << std::hex << " ret: " << ret << " err: " << GetLastError() << "\n";
 		return NULL;
 	}
+	return snapShot;
 }
 
 bool release_process_snapshot(HANDLE procHndl, HANDLE snapshot)
