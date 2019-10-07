@@ -1,6 +1,8 @@
 #include "process_reflection.h"
 #include <processsnapshot.h>
 
+#define USE_RTL_PROCESS_REFLECTION
+
 typedef struct _RTLP_PROCESS_REFLECTION_REFLECTION_INFORMATION
 {
 	HANDLE ReflectionProcessHandle;
@@ -142,7 +144,6 @@ bool release_process_snapshot(HANDLE procHndl, HANDLE snapshot)
 HANDLE make_process_reflection2(HPSS snapshot)
 {
 	PSS_VA_CLONE_INFORMATION info = { 0 };
-	std::cout << "PssCaptureSnapshot success" << std::endl;
 	DWORD ret = PssQuerySnapshot(snapshot, PSS_QUERY_VA_CLONE_INFORMATION, &info, sizeof(info));
 	if (ret != ERROR_SUCCESS) {
 		return NULL;
@@ -155,9 +156,14 @@ HANDLE make_process_reflection2(HPSS snapshot)
 
 HANDLE make_process_reflection(HANDLE orig_hndl)
 {
+	HANDLE clone = NULL;
+#ifdef USE_RTL_PROCESS_REFLECTION
+	clone = make_process_reflection1(orig_hndl);
+#else
 	HPSS snapshot = make_process_snapshot(orig_hndl);
-	HANDLE clone = make_process_reflection2(snapshot);
+	clone = make_process_reflection2(snapshot);
 	release_process_snapshot(orig_hndl, snapshot);
+#endif
 	return clone;
 }
 
