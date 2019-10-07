@@ -42,7 +42,8 @@ HANDLE open_process(DWORD processID)
 {
 	const DWORD basic_access = PROCESS_VM_READ | PROCESS_QUERY_INFORMATION;
 	const DWORD reflection_access = PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION | PROCESS_DUP_HANDLE;
-	DWORD access = basic_access | reflection_access;
+	const DWORD reflection_access2 = PROCESS_CREATE_PROCESS;
+	DWORD access = basic_access | reflection_access | reflection_access2;
 
 	HANDLE hProcess = OpenProcess(
 		access,
