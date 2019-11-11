@@ -9,8 +9,8 @@
 
 struct LoadedModule {
 
-	LoadedModule(DWORD _pid, ULONGLONG _start, size_t _moduleSize)
-		: process_id(_pid), start(_start), end(_start + _moduleSize),
+	LoadedModule(ULONGLONG _start, size_t _moduleSize)
+		: start(_start), end(_start + _moduleSize),
 		is_suspicious(false)
 	{
 	}
@@ -26,7 +26,6 @@ struct LoadedModule {
 
 	ULONGLONG start;
 	ULONGLONG end;
-	DWORD process_id;
 	bool is_suspicious;
 };
 
