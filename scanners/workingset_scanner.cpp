@@ -100,7 +100,8 @@ WorkingSetScanReport* WorkingSetScanner::scanRemote()
 			//cannot retrieve the mapped file name: it may indicate that a transacted file was used (as in Process Doppelganging)
 			is_doppel = true;
 		}
-		if (!is_doppel && memPage.loadModuleName()) {
+		bool isPEBModule = this->pebModules.getModuleContaining(memPage.region_start);
+		if (!is_doppel && isPEBModule) {
 			//probably legit: it was scanned in details during the modules scan
 			return nullptr;
 		}
