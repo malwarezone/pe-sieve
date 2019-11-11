@@ -70,6 +70,7 @@ public:
 	std::string mainImagePath;
 	std::vector<ModuleScanReport*> module_reports; //TODO: make it protected
 	peconv::ExportsMapper *exportsMap;
+	ProcessModules modulesInfo;
 
 protected:
 	void deleteModuleReports()
@@ -91,7 +92,6 @@ protected:
 	DWORD pid;
 	size_t errorsCount;
 
-	ProcessModules modulesInfo;
 	std::set<ModuleScanReport*> reportsByType[REPORT_TYPES_COUNT];
 
 	friend class ProcessScanner;

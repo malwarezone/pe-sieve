@@ -96,16 +96,25 @@ WorkingSetScanReport* WorkingSetScanner::scanRemote()
 	}
 	bool is_doppel = false;
 	if (memPage.mapping_type == MEM_IMAGE) {
-		if (!memPage.loadMappedName()) {
+		const bool is_module_named = memPage.loadModuleName();
+		const bool is_file_named = memPage.loadMappedName();
+		
+		bool is_module_scanned = false;
+		if (modulesList) {
+			LoadedModule *mod = modulesList->getModuleContaining(memPage.region_start);
+			is_module_scanned = mod && mod->is_peb_connected;
+		}
+
+		if (!is_file_named) {
 			//cannot retrieve the mapped file name: it may indicate that a transacted file was used (as in Process Doppelganging)
 			is_doppel = true;
 		}
-		if (!is_doppel && memPage.loadModuleName()) {
+		if (!is_doppel && is_module_scanned) {
 			//probably legit: it was scanned in details during the modules scan
 			return nullptr;
 		}
 		else {
-			std::cout << "[!] " << std::hex << memPage.alloc_base << ": mapped filename: " << memPage.mapped_name << "; module_ name:" << memPage.module_name << std::endl;
+			std::cout << "[!] " << std::hex << memPage.alloc_base << ": mapped filename: " << memPage.mapped_name << std::endl;
 		}
 		
 	}

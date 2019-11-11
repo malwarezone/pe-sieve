@@ -16,7 +16,7 @@ bool ProcessScanReport::appendToModulesList(ModuleScanReport *report)
 	LoadedModule* mod = modulesInfo.getModuleAt(module_start);
 	if (mod == nullptr) {
 		//create new only if it was not found
-		mod = new LoadedModule(report->pid, module_start, report->moduleSize);
+		mod = new LoadedModule(report->pid, module_start, report->moduleSize, report->isPEBconnected);
 		modulesInfo.appendModule(mod);
 	}
 	if (mod->is_suspicious == false) {

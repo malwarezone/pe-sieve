@@ -7,6 +7,7 @@
 #include <peconv.h>
 #include "module_scan_report.h"
 #include "mempage_data.h"
+#include "scan_report.h"
 
 #include "../utils/util.h"
 
@@ -23,6 +24,7 @@ public:
 		 has_shellcode = true;
 		 is_doppel = false;
 		 mapping_type = 0;
+		 isPEBconnected = false; //not connected to PEB
 	}
 
 	const virtual bool toJSON(std::stringstream &outs,size_t level = JSON_LEVEL)
@@ -86,10 +88,10 @@ protected:
 
 class WorkingSetScanner {
 public:
-	WorkingSetScanner(HANDLE _procHndl, MemPageData &_memPageDatal, bool _detectShellcode, bool _scanData)
+	WorkingSetScanner(HANDLE _procHndl, ProcessModules *_modulesList, MemPageData &_memPageDatal, bool _detectShellcode, bool _scanData)
 		: processHandle(_procHndl), memPage(_memPageDatal),
 		detectShellcode(_detectShellcode),
-		scanData(_scanData)
+		scanData(_scanData), modulesList(_modulesList)
 	{
 	}
 
@@ -107,4 +109,6 @@ protected:
 	bool detectShellcode; // is shellcode detection enabled
 	HANDLE processHandle;
 	MemPageData &memPage;
+
+	ProcessModules *modulesList; //a list of modules that will be used as a reference
 };

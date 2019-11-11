@@ -38,6 +38,7 @@ public:
 		this->moduleSize = _moduleSize;
 		this->status = _status;
 		this->isDotNetModule = false;
+		this->isPEBconnected = true;
 	}
 
 	ModuleScanReport(HANDLE processHandle, HMODULE _module, size_t _moduleSize)
@@ -47,6 +48,7 @@ public:
 		this->moduleSize = _moduleSize;
 		this->isDotNetModule = false;
 		this->status = SCAN_NOT_SUSPICIOUS;
+		this->isPEBconnected = true;
 	}
 
 	virtual ~ModuleScanReport() {}
@@ -77,6 +79,7 @@ public:
 	bool isDotNetModule;
 	std::string moduleFile;
 	t_scan_status status;
+	bool isPEBconnected; //is the module connected to the PEB list?
 };
 
 class UnreachableModuleReport : public ModuleScanReport
