@@ -7,6 +7,7 @@
 #include <peconv.h>
 #include "module_scan_report.h"
 #include "mempage_data.h"
+#include "scanned_modules.h"
 
 #include "../utils/util.h"
 
@@ -17,7 +18,7 @@ public:
 		: ModuleScanReport(processHandle, _module, _moduleSize, status)
 	{
 		 is_executable = false;
-		 is_listed_module = false;
+		 is_peb_connected = false;
 		 protection = 0;
 		 has_pe = false; //not a PE file
 		 has_shellcode = true;
@@ -54,8 +55,8 @@ public:
 			outs << std::dec << is_doppel;
 		}
 		outs << ",\n";
-		OUT_PADDED(outs, level, "\"is_listed_module\" : ");
-		outs << std::dec << is_listed_module;
+		OUT_PADDED(outs, level, "\"is_peb_connected\" : ");
+		outs << std::dec << is_peb_connected;
 		outs << ",\n";
 		OUT_PADDED(outs, level, "\"protection\" : ");
 		outs << "\"" << std::hex << protection << "\"";
@@ -65,7 +66,7 @@ public:
 	}
 
 	bool is_executable;
-	bool is_listed_module;
+	bool is_peb_connected;
 	bool has_pe;
 	bool has_shellcode;
 	bool is_doppel;
@@ -86,10 +87,10 @@ protected:
 
 class WorkingSetScanner {
 public:
-	WorkingSetScanner(HANDLE _procHndl, MemPageData &_memPageDatal, bool _detectShellcode, bool _scanData)
+	WorkingSetScanner(HANDLE _procHndl, ProcessModules& _pebModules, MemPageData &_memPageDatal, bool _detectShellcode, bool _scanData)
 		: processHandle(_procHndl), memPage(_memPageDatal),
 		detectShellcode(_detectShellcode),
-		scanData(_scanData)
+		scanData(_scanData), pebModules(_pebModules)
 	{
 	}
 
@@ -107,4 +108,5 @@ protected:
 	bool detectShellcode; // is shellcode detection enabled
 	HANDLE processHandle;
 	MemPageData &memPage;
+	ProcessModules& pebModules; //modules connected to PEB
 };

@@ -35,6 +35,11 @@ struct ProcessModules {
 	{
 	}
 
+	ProcessModules(HANDLE processHandle)
+	{
+		process_id = GetProcessId(processHandle);
+	}
+
 	~ProcessModules()
 	{
 		deleteAll();

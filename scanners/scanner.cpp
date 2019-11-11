@@ -155,13 +155,14 @@ size_t ProcessScanner::scanWorkingSet(ProcessScanReport &pReport) //throws excep
 		memPage.is_listed_module = pReport.hasModule(region_base);
 		memPage.is_dep_enabled = this->isDEP;
 
-		WorkingSetScanner memPageScanner(this->processHandle, memPage, this->args.shellcode, this->args.data);
+		WorkingSetScanner memPageScanner(this->processHandle, this->pebModules, memPage, this->args.shellcode, this->args.data);
 		WorkingSetScanReport *my_report = memPageScanner.scanRemote();
 
 		counter++;
 		if (my_report == nullptr) continue;
 
-		my_report->is_listed_module = pReport.hasModule((ULONGLONG) my_report->module);
+		my_report->is_peb_connected = (pebModules.getModuleContaining((ULONGLONG)my_report->module) != nullptr);
+
 		// this is a code section inside a PE file that was already detected
 		if (!my_report->has_pe && pReport.hasModuleContaining((ULONGLONG)my_report->module)) {
 			my_report->status = SCAN_NOT_SUSPICIOUS;
@@ -192,30 +193,55 @@ ModuleScanReport* ProcessScanner::scanForMappingMismatch(ModuleData& modData, Pr
 	return scan_report;
 }
 
+size_t ProcessScanner::makePebModulesList()
+{
+	pebModules.deleteAll();
+
+	HMODULE hMods[1024];
+	const size_t modules_count = enum_modules(processHandle, hMods, sizeof(hMods), args.modules_filter);
+	if (modules_count == 0) {
+		return 0;
+	}
+	size_t counter = 0;
+	for (counter = 0; counter < modules_count; counter++) {
+		HMODULE hModule = hMods[counter];
+
+		MODULEINFO modinfo = { 0 };
+		if (!GetModuleInformation(processHandle, hModule, &modinfo, sizeof(MODULEINFO))) return 0;
+		LoadedModule *mod = new LoadedModule((ULONGLONG)hModule, modinfo.SizeOfImage);
+		if (!pebModules.appendModule(mod)) {
+			delete mod; mod = nullptr; // this should not happen
+		}
+	}
+	return counter;
+}
+
 size_t ProcessScanner::scanModules(ProcessScanReport &pReport)  //throws exceptions
 {
-	HMODULE hMods[1024];
-	const size_t modules_count = enum_modules(this->processHandle, hMods, sizeof(hMods), args.modules_filter);
-	if (modules_count == 0) {
+	if (!makePebModulesList()) {
 		return 0;
 	}
 	if (args.imprec_mode != PE_IMPREC_NONE) {
 		pReport.exportsMap = new peconv::ExportsMapper();
 	}
+	size_t scanned = 0;
+	std::map<ULONGLONG, LoadedModule*>::const_iterator itr;
+	for (itr = this->pebModules.modulesMap.begin(); itr != pebModules.modulesMap.end(); itr++) {
+		LoadedModule *mod = itr->second;
+		if (!processHandle || !mod) break;
 
-	size_t counter = 0;
-	for (counter = 0; counter < modules_count; counter++) {
-		if (processHandle == nullptr) break;
+		scanned++;
+
+		HMODULE curr_module = (HMODULE)mod->start;
 
 		//load module from file:
-		ModuleData modData(processHandle, hMods[counter]);
-
+		ModuleData modData(processHandle, curr_module);
 		ModuleScanReport *mappingScanReport = this->scanForMappingMismatch(modData, pReport);
 
 		if (!modData.loadOriginal()) {
 			std::cout << "[!][" << args.pid <<  "] Suspicious: could not read the module file!" << std::endl;
 			//make a report that finding original module was not possible
-			pReport.appendReport(new UnreachableModuleReport(processHandle, hMods[counter], 0, modData.szModName));
+			pReport.appendReport(new UnreachableModuleReport(processHandle, curr_module, 0, modData.szModName));
 			continue;
 		}
 		if (!args.quiet) {
@@ -230,10 +256,10 @@ size_t ProcessScanner::scanModules(ProcessScanReport &pReport)  //throws excepti
 			continue;
 		}
 		//load data about the remote module
-		RemoteModuleData remoteModData(processHandle, hMods[counter]);
+		RemoteModuleData remoteModData(processHandle, (HMODULE)mod->start);
 		if (remoteModData.isInitialized() == false) {
 			//make a report that initializing remote module was not possible
-			pReport.appendReport(new MalformedHeaderReport(processHandle, hMods[counter], 0, modData.szModName));
+			pReport.appendReport(new MalformedHeaderReport(processHandle, curr_module, 0, modData.szModName));
 			continue;
 		}
 		t_scan_status is_hollowed = scanForHollows(modData, remoteModData, pReport);
@@ -252,5 +278,5 @@ size_t ProcessScanner::scanModules(ProcessScanReport &pReport)  //throws excepti
 			scanForHooks(modData, remoteModData, pReport);
 		}
 	}
-	return counter;
+	return scanned;
 }
