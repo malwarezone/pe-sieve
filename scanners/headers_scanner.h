@@ -58,7 +58,7 @@ public:
 		return true;
 	}
 
-	bool isHdrReplaced()
+	bool isHdrReplaced() const
 	{
 		return secHdrModified;
 	}

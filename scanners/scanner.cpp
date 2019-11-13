@@ -50,12 +50,13 @@ t_scan_status ProcessScanner::scanForHollows(HANDLE processHandle, ModuleData& m
 		}
 	}
 	scan_report->moduleFile = modData.szModName;
-
-	t_scan_status is_suspicious = ModuleScanReport::get_scan_status(scan_report);
-	if (is_suspicious && !scan_report->isHdrReplaced()) {
+	
+	const t_scan_status is_suspicious = ModuleScanReport::get_scan_status(scan_report);
+	/*if (is_suspicious && !scan_report->isHdrReplaced()) {
 		is_suspicious = SCAN_NOT_SUSPICIOUS;
-	}
+	}*/
 	if (process_report) {
+		std::cout << "Appending Hollows report with status: " << scan_report->ModuleScanReport::get_scan_status(scan_report) << std::endl;
 		process_report->appendReport(scan_report);
 	}
 	else {
