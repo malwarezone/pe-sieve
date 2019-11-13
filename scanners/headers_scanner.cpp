@@ -61,14 +61,17 @@ HeadersScanReport* HeadersScanner::scanRemote()
 	my_report->ntHdrModified = isNtHdrModified(hdr_buffer1, hdr_buffer2, hdrs_size);
 	my_report->secHdrModified = isSecHdrModified(hdr_buffer1, hdr_buffer2, hdrs_size);
 
-	if (moduleData.isDotNet() && !my_report->isHdrReplaced()) {
-		//.NET modules may overwrite some parts of their own headers
-		std::cout << "[#] .NET automodified fragments of the header. Setting as not suspicious!\n";
-		my_report->status = SCAN_NOT_SUSPICIOUS;
+	if (moduleData.isDotNet()) {
+		std::cout << "[#] .NET module detected as SUSPICIOUS\n";
+		if (!my_report->isHdrReplaced()) {
+			//.NET modules may overwrite some parts of their own headers
+			std::cout << "[#] .NET automodified fragments of the header. Setting as not suspicious!\n";
+			my_report->status = SCAN_NOT_SUSPICIOUS;
+			return my_report;
+		}
 	}
-	else {
-		my_report->status = SCAN_SUSPICIOUS;
-	}
+
+	my_report->status = SCAN_SUSPICIOUS;
 	return my_report;
 }
 

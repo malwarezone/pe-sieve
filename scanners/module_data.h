@@ -42,7 +42,6 @@ public:
 
 	bool isDotNet()
 	{
-		this->is_dot_net = isDotNetManagedCode();
 		return this->is_dot_net;
 	}
 
