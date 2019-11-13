@@ -111,7 +111,7 @@ bool ModuleData::isDotNetManagedCode()
 		return false;
 	}
 #ifdef _DEBUG
-	std::cout << "This is a .NET module: " << this->this->szModName << std::endl;
+	std::cout << "This is a .NET module: " << this->szModName << std::endl;
 #endif
 	return true;
 }
