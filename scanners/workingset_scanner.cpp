@@ -121,7 +121,13 @@ bool WorkingSetScanner::scanDisconnectedImg()
 
 	//load module from file:
 	ModuleData modData(processHandle, module_start, memPage.mapped_name);
-	
+	if (!modData.loadOriginal()) {
+		if (show_info) {
+			std::cout << "[-] Could not load the file for the module: " << std::hex << module_start << std::endl;
+		}
+		return false;
+	}
+	std::cout << "Is .NET? " << modData.isDotNet() << std::endl;
 	const t_scan_status status = ProcessScanner::scanForHollows(processHandle, modData, remoteModData, processReport);
 #ifdef _DEBUG
 	std::cout << "[*] Scanned for hollows. Status: " << status << std::endl;
