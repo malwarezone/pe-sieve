@@ -3,7 +3,7 @@
 
 HeadersScanReport* HeadersScanner::scanRemote()
 {
-	if (!moduleData.isInitialized() && !moduleData.loadOriginal()) {
+	if (!moduleData.isInitialized() || !moduleData.loadOriginal()) {
 		std::cerr << "[-] Module not initialized" << std::endl;
 		return nullptr;
 	}
