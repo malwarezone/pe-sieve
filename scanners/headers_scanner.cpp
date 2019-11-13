@@ -7,14 +7,12 @@ HeadersScanReport* HeadersScanner::scanRemote()
 		std::cerr << "[-] Module not initialized" << std::endl;
 		return nullptr;
 	}
-
 	HeadersScanReport *my_report = new HeadersScanReport(this->processHandle, moduleData.moduleHandle, remoteModData.getModuleSize());
 	if (!remoteModData.isInitialized()) {
 		std::cerr << "[-] Failed to read the module header" << std::endl;
 		my_report->status = SCAN_ERROR;
 		return my_report;
 	}
-	std::cout << ">>> Is .NET? " << moduleData.isDotNet() << std::endl;
 
 	BYTE hdr_buffer1[peconv::MAX_HEADER_SIZE] = { 0 };
 	memcpy(hdr_buffer1, remoteModData.headerBuffer, peconv::MAX_HEADER_SIZE);
@@ -62,9 +60,12 @@ HeadersScanReport* HeadersScanner::scanRemote()
 
 	if (moduleData.isDotNet()) {
 		std::cout << "[#] .NET module detected as SUSPICIOUS\n";
-		if (!my_report->isHdrReplaced()) {
+		if (!my_report->isHdrReplaced()
+			&& (my_report->archMismatch && my_report->epModified)
+			)
+		{
 			//.NET modules may overwrite some parts of their own headers
-			std::cout << "[#] .NET automodified fragments of the header. Setting as not suspicious!\n";
+			std::cout << "[#] Filtered out modifications typical for .NET files, setting as not suspicious\n";
 			my_report->status = SCAN_NOT_SUSPICIOUS;
 			return my_report;
 		}
