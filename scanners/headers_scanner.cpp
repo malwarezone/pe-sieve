@@ -14,6 +14,7 @@ HeadersScanReport* HeadersScanner::scanRemote()
 		my_report->status = SCAN_ERROR;
 		return my_report;
 	}
+	std::cout << ">>> Is .NET? " << moduleData.isDotNet() << std::endl;
 
 	BYTE hdr_buffer1[peconv::MAX_HEADER_SIZE] = { 0 };
 	memcpy(hdr_buffer1, remoteModData.headerBuffer, peconv::MAX_HEADER_SIZE);
@@ -37,11 +38,9 @@ HeadersScanReport* HeadersScanner::scanRemote()
 	DWORD arch1 = peconv::get_nt_hdr_architecture(hdr_buffer1);
 	DWORD arch2 = peconv::get_nt_hdr_architecture(hdr_buffer2);
 	if (arch1 != arch2) {
-		my_report->archMismatch = true;
+		// this often happend in .NET modules
 		//if there is an architecture mismatch it may indicate that a different version of the app was loaded (possibly legit)
-		//TODO: implement a better verification, for now mark as suspicious
-		my_report->status = SCAN_SUSPICIOUS;
-		return my_report;
+		my_report->archMismatch = true;
 	}
 	//normalize before comparing:
 	peconv::update_image_base(hdr_buffer1, 0);
