@@ -3,10 +3,7 @@
 
 HeadersScanReport* HeadersScanner::scanRemote()
 {
-	if (!moduleData.isInitialized()) {
-		moduleData.loadOriginal();
-	}
-	if (!moduleData.isInitialized()) {
+	if (!moduleData.isInitialized() && !moduleData.loadOriginal()) {
 		std::cerr << "[-] Module not initialized" << std::endl;
 		return nullptr;
 	}
@@ -64,7 +61,7 @@ HeadersScanReport* HeadersScanner::scanRemote()
 	my_report->ntHdrModified = isNtHdrModified(hdr_buffer1, hdr_buffer2, hdrs_size);
 	my_report->secHdrModified = isSecHdrModified(hdr_buffer1, hdr_buffer2, hdrs_size);
 
-	if (my_report->isDotNetModule && !my_report->isHdrReplaced()) {
+	if (moduleData.isDotNet() && !my_report->isHdrReplaced()) {
 		//.NET modules may overwrite some parts of their own headers
 		std::cout << "[#] .NET automodified fragments of the header. Setting as not suspicious!\n";
 		my_report->status = SCAN_NOT_SUSPICIOUS;

@@ -22,7 +22,7 @@ bool ModuleData::loadModuleName()
 bool ModuleData::loadOriginal()
 {
 	if (strlen(this->szModName) == 0) {
-		loadModuleName();
+		if (!loadModuleName()) return false;
 	}
 	is_relocated = false;
 	//just in case if something was loaded before...
@@ -96,6 +96,10 @@ bool ModuleData::reloadWow64()
 
 bool ModuleData::isDotNetManagedCode()
 {
+	if (!original_module) {
+		std::cout << "[#] isDotNetManagedCode: cannot retrieve the value, the module is not loaded!\n";
+		return false;
+	}
 	//has a directory entry for .NET header
 	IMAGE_DATA_DIRECTORY* dotNetDir = peconv::get_directory_entry(this->original_module, IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 	if (dotNetDir == nullptr) {

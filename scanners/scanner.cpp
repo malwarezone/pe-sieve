@@ -56,7 +56,6 @@ t_scan_status ProcessScanner::scanForHollows(HANDLE processHandle, ModuleData& m
 		is_suspicious = SCAN_NOT_SUSPICIOUS;
 	}*/
 	if (process_report) {
-		std::cout << "Appending Hollows report with status: " << scan_report->ModuleScanReport::get_scan_status(scan_report) << std::endl;
 		process_report->appendReport(scan_report);
 	}
 	else {

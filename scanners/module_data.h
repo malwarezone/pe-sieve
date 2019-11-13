@@ -40,7 +40,11 @@ public:
 		return peconv::is64bit(original_module);
 	}
 
-	bool isDotNet() { return this->is_dot_net; }
+	bool isDotNet()
+	{
+		this->is_dot_net = isDotNetManagedCode();
+		return this->is_dot_net;
+	}
 
 	ULONGLONG rvaToVa(DWORD rva)
 	{
