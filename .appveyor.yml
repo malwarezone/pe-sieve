@@ -30,6 +30,7 @@ before_build:
       cmake .. -A x64 )
   - if [%env_arch%]==[x86] (
       cmake .. )
+  - mkdir %APPVEYOR_BUILD_FOLDER%/%APPVEYOR_REPO_COMMIT% 
   - cmake -DCMAKE_INSTALL_PREFIX:PATH=%APPVEYOR_BUILD_FOLDER%/%APPVEYOR_REPO_COMMIT% ..
   
 build_script:
