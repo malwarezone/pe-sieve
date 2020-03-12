@@ -22,15 +22,19 @@ environment:
   matrix:
     - env_arch: "x64"
     - env_arch: "x86"
-
-build_script:
+    
+before_build:
   - mkdir build
   - cd build
   - if [%env_arch%]==[x64] (
       cmake .. -A x64 )
   - if [%env_arch%]==[x86] (
       cmake .. )
-  - cmake --build . --config %CONFIGURATION%
+  - mkdir %APPVEYOR_REPO_COMMIT%
+  - cmake -DCMAKE_INSTALL_PREFIX:PATH=%APPVEYOR_REPO_COMMIT% ..
+  
+build_script:
+  - cmake --build . --config %CONFIGURATION% --target install
   
 on_success:
-  - ls -R %CONFIGURATION%
+  - ls -R %APPVEYOR_REPO_COMMIT%
