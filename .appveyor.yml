@@ -33,3 +33,5 @@ build_script:
   - cmake --build .
   - cd ..
   
+on_success:
+  - ls -R
