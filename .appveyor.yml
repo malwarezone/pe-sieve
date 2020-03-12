@@ -36,4 +36,4 @@ build_script:
   - cmake --build . --config %CONFIGURATION% --target install
   
 on_success:
-  - ls -R %APPVEYOR_REPO_COMMIT%
+  - ls -R %APPVEYOR_BUILD_FOLDER%/%APPVEYOR_REPO_COMMIT%
