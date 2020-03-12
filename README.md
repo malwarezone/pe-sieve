@@ -1,6 +1,6 @@
 <img src="./logo/PE-SIEVE.png" alt="PE-sieve" width=200>
 
-[![Build status](https://ci.appveyor.com/api/projects/status/crlo8iyvi4bm80yp?svg=true)](https://ci.appveyor.com/project/hasherezade/pe-sieve)
+[![Build status](https://ci.appveyor.com/api/projects/status/32aim88aqaeggtlm/branch/master?svg=true)](https://ci.appveyor.com/project/malwarezone/pe-sieve/branch/master)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-blue.svg)](https://opensource.org/licenses/BSD-2-Clause)
 [![GitHub release](https://img.shields.io/github/release/hasherezade/pe-sieve.svg)](https://github.com/hasherezade/pe-sieve/releases)
 [![Github All Releases](https://img.shields.io/github/downloads/hasherezade/pe-sieve/total.svg)](http://www.somsubhra.com/github-release-stats/?username=hasherezade&repository=pe-sieve) 
